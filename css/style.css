@@ -154,3 +154,20 @@ button,input,select,textarea{font-family:"DM Sans","Nunito Sans",sans-serif}
   .head{align-items:flex-start}
     .head-actions .primary,.head-actions .secondary{white-space:nowrap}
   .toolbar   }
+
+.head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.clear-data-btn{white-space:nowrap}
+.clear-data-form{gap:12px}
+.clear-note{padding:12px 13px;border:1px solid var(--line);background:#f7f9f4;border-radius:12px;display:grid;gap:3px}
+.clear-note strong{font-size:12px}.clear-note span{font-size:10px;color:var(--muted);line-height:1.4}
+.clear-checks{display:grid;gap:7px}
+.clear-check{display:flex!important;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer}
+.clear-check input,.clear-confirm input{width:auto!important;margin:0}
+.clear-check span{display:grid;gap:2px}.clear-check b{font-size:11px}.clear-check small{font-size:9px;color:var(--muted)}
+.clear-confirm{display:flex!important;align-items:flex-start;gap:9px;padding:3px 0}.clear-confirm span{font-size:9px;color:var(--muted);line-height:1.45}
+.danger{border:0;background:#e98e85;color:#fff;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer}
+@media(max-width:720px){
+ .head{align-items:flex-start}
+ .head-actions{width:auto;max-width:100%}
+ .clear-data-btn{font-size:9px;padding:9px 11px}
+}
