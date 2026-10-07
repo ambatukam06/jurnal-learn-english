@@ -164,3 +164,12 @@ button,input,select,textarea{font-family:"DM Sans","Nunito Sans",sans-serif}
 .danger{border:0;background:#ed8f87;color:#fff;border-radius:12px;padding:11px 14px;font-size:10px;font-weight:800;cursor:pointer}
 .danger:hover{filter:brightness(.97)}
 @media(max-width:720px){.clear-data-btn{font-size:9px;padding:9px 11px}.head{gap:8px}.clear-option{padding:12px}.danger{width:100%}}
+
+.head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media(max-width:720px){
+  .head{align-items:flex-start}
+  .head-actions{flex:0 0 auto;justify-content:flex-end}
+  .head-actions .primary,.head-actions .secondary{white-space:nowrap}
+  .toolbar .clear-data-btn{margin-left:0}
+  .clear-data-btn{margin-left:0}
+}
