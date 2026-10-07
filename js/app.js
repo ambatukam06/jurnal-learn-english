@@ -33,58 +33,6 @@ window.addEventListener('resize',()=>{if(window.innerWidth>720)closeMobileDrawer
 document.getElementById('notify').onclick=()=>say('You have '+dueCount()+' review items due.');
 document.getElementById('quick').onclick=()=>openModal('session');document.getElementById('quickTop').onclick=()=>openModal('session');
 
-const clearGroups={
-  learning:{label:'Learning Log',key:'sessions'},
-  vocab:{label:'Vocabulary',key:'vocab'},
-  speaking:{label:'Speaking',key:'speaking'},
-  listening:{label:'Listening',key:'listening'},
-  knowledge:{label:'Knowledge & Topics',key:'topics'},
-  mistakes:{label:'Mistake Bank',key:'mistakes'},
-  resources:{label:'Resources',key:'resources'},
-  goals:{label:'Goals & Roadmap',key:'goals'},
-  reflections:{label:'Reflections',key:'reflections'},
-  review:{label:'Review data',key:null}
-};
-function openClearData(){
-  const modal=document.getElementById('modal'),title=document.getElementById('modalTitle'),body=document.getElementById('modalBody');
-  title.textContent='Clear selected data';
-  body.innerHTML=`<form class="form clear-data-form" id="fClearData">
-    <div class="clear-note"><strong>Choose what to remove.</strong><span>This only deletes the categories you select. There is no Clear All option.</span></div>
-    <div class="clear-checks">${Object.entries(clearGroups).map(([id,g])=>`<label class="clear-check"><input type="checkbox" name="clearKey" value="${id}"><span><b>${g.label}</b><small>${id==='review'?'Clear review-related saved data':'Delete saved '+g.label.toLowerCase()}</small></span></label>`).join('')}</div>
-    <label class="clear-confirm"><input type="checkbox" name="confirm" required><span>I understand the selected data will be removed from this device.</span></label>
-    <button class="danger" type="submit">Clear selected data</button>
-  </form>`;
-  modal.classList.add('show');
-  const form=body.querySelector('#fClearData');
-  form.onsubmit=e=>{
-    e.preventDefault();
-    const selected=[...form.querySelectorAll('input[name="clearKey"]:checked')].map(x=>x.value);
-    if(!selected.length){say('Select at least one data type.');return}
-    if(!form.confirm.checked){say('Confirm before clearing.');return}
-    const has=x=>selected.includes(x);
-    if(has('learning')) data.sessions=[];
-    if(has('vocab')) data.vocab=[];
-    if(has('speaking')){
-      const topics=new Set(data.speaking.map(x=>x.topic));
-      data.speaking=[];
-      data.sessions=data.sessions.filter(s=>!(s.activity||'').startsWith('Speaking: ')||!topics.has((s.activity||'').slice(10)));
-    }
-    if(has('listening')){
-      const titles=new Set(data.listening.map(x=>x.title));
-      data.listening=[];
-      data.sessions=data.sessions.filter(s=>!(s.activity||'').startsWith('Listening: ')||!titles.has((s.activity||'').slice(11)));
-    }
-    if(has('knowledge')) data.topics=[];
-    if(has('mistakes')) data.mistakes=[];
-    if(has('resources')) data.resources=[];
-    if(has('goals')) data.goals=[];
-    if(has('reflections')) data.reflections=[];
-    if(has('review')) { data.vocab=[]; data.mistakes=[]; }
-    modal.classList.remove('show');
-    save();
-    say(selected.length===1 ? clearGroups[selected[0]].label+' cleared.' : selected.length+' data categories cleared.');
-  };
-}
 function openModal(type){const modal=document.getElementById('modal'),title=document.getElementById('modalTitle'),body=document.getElementById('modalBody');const forms={
  session:['Add learning session',`<form class="form" id="fSession"><div class="grid two"><div><label>Date</label><input name="date" type="date" value="${iso(today)}"></div><div><label>Duration (minutes)</label><input name="duration" type="number" min="1" value="20"></div></div><label>What did you learn / do?</label><input name="activity" required placeholder="e.g. Casual conversation practice"><div class="grid two"><div><label>Skill</label><select name="skill"><option>Speaking</option><option>Listening</option><option>Vocabulary</option><option>Grammar</option><option>Reading</option><option>Writing</option><option>Pronunciation</option></select></div><div><label>Source</label><select name="source"><option>ChatGPT</option><option>YouTube</option><option>Course</option><option>Book</option><option>Website</option><option>Practice</option><option>Other</option></select></div></div><label>Result / understanding %</label><input name="result" type="number" min="0" max="100" value="70"><label>Notes</label><textarea name="notes" placeholder="What was easy, hard, or new?"></textarea><button class="primary">Save session</button></form>`],
  vocab:['Add vocabulary',`<form class="form" id="fVocab"><label>Word / phrase</label><input name="word" required placeholder="e.g. figure out"><label>Meaning</label><input name="meaning" required placeholder="Simple meaning in Indonesian or English"><label>Example sentence</label><textarea name="example" required placeholder="Use it in a full sentence."></textarea><div class="grid two"><div><label>Source</label><input name="source" placeholder="ChatGPT / YouTube / URL title"></div><div><label>Status</label><select name="status"><option>New</option><option>Learning</option><option>Familiar</option><option>Active</option><option>Mastered</option></select></div></div><label>Next review</label><input name="review" type="date" value="${iso(new Date(Date.now()+86400000*2))}"><button class="primary">Save vocabulary</button></form>`],
@@ -164,8 +112,8 @@ function renderCalendar(){const y=calendarCursor.getFullYear(),m=calendarCursor.
 document.getElementById('prevMonth').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar()};document.getElementById('nextMonth').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar()};
 function renderAnalytics(){const mins=totalMinutes(),avgSession=data.sessions.length?Math.round(mins/data.sessions.length):0;document.getElementById('analyticsMetrics').innerHTML=[['Total minutes',mins,'All logged sessions'],['Active days',uniqueStudyDays(),'Across saved activity'],['Consistency',daysActiveLast30()+'%','Last 30 days'],['Avg session',avgSession+' min','Across learning log']].map(x=>`<div class="card mini"><h3>${x[0]}</h3><div class="big-number">${x[1]}</div><p>${x[2]}</p></div>`).join('');const heat=document.getElementById('heatmap');heat.innerHTML='';for(let i=27;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=iso(d);const mins=data.sessions.filter(s=>s.date===k).reduce((a,s)=>a+s.duration,0)+data.speaking.filter(s=>s.date===k).reduce((a,s)=>a+s.duration,0)+data.listening.filter(s=>s.date===k).reduce((a,s)=>a+s.duration,0);const level=mins===0?'':mins<15?'l1':mins<30?'l2':mins<60?'l3':'l4';heat.innerHTML+=`<i title="${k}: ${mins} min" style="background:${level==='l1'?'#e8f1d4':level==='l2'?'#d6ebaa':level==='l3'?'#bddd73':level==='l4'?'#c9f34d':'#edf0eb'}"></i>`}const skills=['Speaking','Listening','Vocabulary','Grammar','Pronunciation'];document.getElementById('analyticsWeakness').innerHTML=skills.sort((a,b)=>skillValue(a)-skillValue(b)).map((s,i)=>`<div class="row"><div><strong>${i+1}. ${s}</strong><small>${skillValue(s)}% current estimate</small></div><span class="status ${i===0?'warn':''}">${i===0?'Priority':'Focus'}</span></div>`).join('');const sources={};data.sessions.forEach(s=>sources[s.source]=(sources[s.source]||0)+1);document.getElementById('sourceAnalytics').innerHTML=Object.entries(sources).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>`<div class="card mini"><h3>${esc(x[0])}</h3><div class="big-number">${x[1]}</div><p>Learning log sessions from this source.</p></div>`).join('')}
 function renderReflections(){document.getElementById('reflectionList').innerHTML=data.reflections.map(r=>`<div class="row"><div><strong>${r.date}</strong><small><b>Improved:</b> ${esc(r.improved)}<br><b>Difficult:</b> ${esc(r.difficult)}<br><b>Next:</b> ${esc(r.next)}</small></div><span class="status active">Saved</span></div>`).join('')||'<div class="empty">No reflections yet.</div>'}
-document.querySelectorAll('.clear-data-btn').forEach(b=>b.addEventListener('click',openClearData));document.getElementById('learningSkillFilter').onchange=renderLearning;document.getElementById('learningSourceFilter').onchange=renderLearning;document.getElementById('clearFilters').onclick=()=>{document.getElementById('learningSkillFilter').value='all';document.getElementById('learningSourceFilter').value='all';renderLearning()};document.getElementById('vocabSearch').oninput=renderVocab;document.getElementById('vocabStatusFilter').onchange=renderVocab;document.getElementById('reviewNow').onclick=()=>showPage('review');
+document.getElementById('learningSkillFilter').onchange=renderLearning;document.getElementById('learningSourceFilter').onchange=renderLearning;document.getElementById('clearFilters').onclick=()=>{document.getElementById('learningSkillFilter').value='all';document.getElementById('learningSourceFilter').value='all';renderLearning()};document.getElementById('vocabSearch').oninput=renderVocab;document.getElementById('vocabStatusFilter').onchange=renderVocab;document.getElementById('reviewNow').onclick=()=>showPage('review');
 document.getElementById('globalSearch').oninput=e=>{const q=e.target.value.toLowerCase().trim();if(!q)return;const hits=[...data.vocab.filter(v=>(v.word+' '+v.meaning).toLowerCase().includes(q)).map(()=>['vocab']),...data.resources.filter(r=>(r.title+' '+r.notes).toLowerCase().includes(q)).map(()=>['resources']),...data.sessions.filter(s=>(s.activity+' '+s.notes).toLowerCase().includes(q)).map(()=>['learning'])];if(hits.length===1)showPage(hits[0][0])};
 renderAll();
 
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=5').catch(()=>{}));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=6').catch(()=>{}));}
