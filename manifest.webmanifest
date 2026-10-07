@@ -1,0 +1,18 @@
+{
+  "name": "Jurnal Learn English",
+  "short_name": "Learn English",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5f1",
+  "theme_color": "#c9f34d",
+  "description": "Personal offline-first English learning dashboard.",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
