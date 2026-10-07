@@ -6,6 +6,8 @@ const fmt=d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const defaults={sessions:[],vocab:[],resources:[],speaking:[],listening:[],topics:[],mistakes:[],goals:[],reflections:[]};
+// Fresh workspace: intentionally reset local learning data for this build.
+try{localStorage.removeItem(KEY)}catch(e){}
 let data=load();
 let calendarCursor=new Date(today.getFullYear(),today.getMonth(),1);let selectedDate=iso(today);
 function load(){try{const raw=localStorage.getItem(KEY);if(raw)return {...defaults,...JSON.parse(raw)};}catch(e){}return structuredClone(defaults)}
